@@ -1,18 +1,4 @@
 # MUDAC2018
-## Logistic regression
-## Linear discriminant analysis
-## Mixture disriminant analysis
-## Quadratic Discriminant Analysis
-## Neural Network
-## Flexible Discriminant Analysis
-## Support Vector Machine
-## k-Nearest Neighbors
-## Naive Bayes
-## Classification and Regression Trees (CART)
-## Bagging CART
-## Random Forest
-## Gradient Boosted Machine
-## Elastic net
 
 ### Open file
 
@@ -82,7 +68,13 @@ default_glm_mod = train(
 default_glm_mod$finalModel
 ```
 
-### Bayes
+### Naive Bayes
+
+```{r}
+library(e1071)
+iris_nb = naiveBayes(Species ~ ., data = iris_trn)
+iris_nb
+```
 
 ### KNN
 
@@ -98,7 +90,22 @@ default_knn_mod = train(
 ```
 
 
-### Kmeans
+### LDA
+
+```{r}
+library(MASS)
+iris_lda = lda(Species ~ ., data = iris_trn)
+iris_lda_trn_pred = predict(iris_lda, iris_trn)$class
+iris_lda_tst_pred = predict(iris_lda, iris_tst)$class
+iris_lda_flat = lda(Species ~ ., data = iris_trn, prior = c(1, 1, 1) / 3)
+```
+
+### QDA
+
+```{r}
+iris_qda = qda(Species ~ ., data = iris_trn)
+iris_qda
+```
 
 ### Ridge
 
@@ -272,6 +279,33 @@ abline(model_lm, lwd = 3, col = "dodgerblue")
 ### Kable
 
 ```{r}
+classifiers = c("LDA", "LDA, Flat Prior", "QDA", "Naive Bayes")
+
+train_err = c(
+  calc_class_err(predicted = iris_lda_trn_pred,      actual = iris_trn$Species),
+  calc_class_err(predicted = iris_lda_flat_trn_pred, actual = iris_trn$Species),
+  calc_class_err(predicted = iris_qda_trn_pred,      actual = iris_trn$Species),
+  calc_class_err(predicted = iris_nb_trn_pred,       actual = iris_trn$Species)
+)
+
+test_err = c(
+  calc_class_err(predicted = iris_lda_tst_pred,      actual = iris_tst$Species),
+  calc_class_err(predicted = iris_lda_flat_tst_pred, actual = iris_tst$Species),
+  calc_class_err(predicted = iris_qda_tst_pred,      actual = iris_tst$Species),
+  calc_class_err(predicted = iris_nb_tst_pred,       actual = iris_tst$Species)
+)
+
+results = data.frame(
+  classifiers,
+  train_err,
+  test_err
+)
+
+colnames(results) = c("Method", "Train Error", "Test Error")
+```
+
+```{r}
+knitr::kable(results)
 knitr::kable(head(sim_gbm_mod$results), digits = 3)
 ```
 
